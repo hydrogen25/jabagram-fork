@@ -260,7 +260,18 @@ class TelegramClient(ChatHandlerFactory):
             for entity in message["entities"]:
                 if "url" in entity:
                     links.append(entity["url"])
+            print(links)
+            if not links:
+                return None
+            formatted="\n".join(links)+"\n"
             
+            result = "\n\n\n本条消息包含以下连接↓ \n\n"+formatted
+            return result
+        elif "caption_entities" in message:
+            links = []
+            for entity in message["caption_entities"]:
+                if "url" in entity:
+                    links.append(entity["url"])
             
             print(links)
             if not links:
