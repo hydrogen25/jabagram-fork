@@ -248,11 +248,31 @@ class TelegramClient(ChatHandlerFactory):
             reply_body = attachment.fname
 
         return reply_body
+    
+    def __get_links(self,message:dict) -> str | None:
+        if "本条消息包含以下连接↓ " in message["text"]:
+            return None
+
+        if "entities" in message:
+            links = []
+            for entity in message["entities"]:
+                if "url" in entity:
+                    links.append(entity["url"])
+
+            formatted="\n".join(links)+"\n"
+            result = "\n\n\n本条消息包含以下连接↓ \n\n"+formatted
+            return result
+        else:
+            return None
+
+                
+  
 
     async def __process_message(self, raw_message: dict, edit=False) -> None:
         chat_id = str(raw_message['chat']['id'])
         message_id = str(raw_message['message_id'])
         sender: str = self.__get_full_name(raw_message['from'])
+        links:str | None = self.__get_links(raw_message)
         text: str | None = raw_message.get(
             "text") or raw_message.get("caption")
         reply: str | None = self.__get_reply(raw_message)
@@ -261,10 +281,11 @@ class TelegramClient(ChatHandlerFactory):
             sender, raw_message
         )
         topic_name: str | None = self.__extract_topic_name(raw_message)
-
+#解析话题
         if topic_name:
-            sender += " [" + topic_name + "]"
-
+            sender += "消息来自话题 -> * [" + topic_name + "] *"
+    
+    
         if attachment:
             async def url_callback():
                 try:
@@ -275,7 +296,7 @@ class TelegramClient(ChatHandlerFactory):
                         f"{self.__token}/{file_path}"
                     )
                     return url
-                except TelegramApiError as error:
+                except TelegramApiError as erroentitiesr:
                     self.__logger.error(
                         "Failed to get url of attachment: %s", error
                     )
@@ -321,8 +342,13 @@ class TelegramClient(ChatHandlerFactory):
                         original_sender = self.__get_full_name(user)
                     case {"sender_user_name": name}:
                         original_sender = name
+                
 
-                text = f"**Message forwarded from {original_sender}**\n\n{text}"
+                text = f"**消息来自 {original_sender} 频道**\n\n{text}"
+
+            if links:
+                print(links)
+                text += f"\n{links}"
 
             await self.__disptacher.send(
                 Message(
