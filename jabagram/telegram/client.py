@@ -250,6 +250,8 @@ class TelegramClient(ChatHandlerFactory):
         return reply_body
     
     def __get_links(self,message:dict) -> str | None:
+        if not message.get("text"):
+            return None
         if "本条消息包含以下连接↓ " in message.get("text"):
             return None
 
