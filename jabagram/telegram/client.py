@@ -250,7 +250,7 @@ class TelegramClient(ChatHandlerFactory):
         return reply_body
     
     def __get_links(self,message:dict) -> str | None:
-        if "本条消息包含以下连接↓ " in message["text"]:
+        if "本条消息包含以下连接↓ " in message.get("text"):
             return None
 
         if "entities" in message:
@@ -258,8 +258,13 @@ class TelegramClient(ChatHandlerFactory):
             for entity in message["entities"]:
                 if "url" in entity:
                     links.append(entity["url"])
-
+            
+            
+            print(links)
+            if not links:
+                return None
             formatted="\n".join(links)+"\n"
+            
             result = "\n\n\n本条消息包含以下连接↓ \n\n"+formatted
             return result
         else:
@@ -342,12 +347,10 @@ class TelegramClient(ChatHandlerFactory):
                         original_sender = self.__get_full_name(user)
                     case {"sender_user_name": name}:
                         original_sender = name
-                
 
                 text = f"**消息来自 {original_sender} 频道**\n\n{text}"
 
             if links:
-                print(links)
                 text += f"\n{links}"
 
             await self.__disptacher.send(
