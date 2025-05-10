@@ -270,8 +270,8 @@ class TelegramClient(ChatHandlerFactory):
         elif "caption_entities" in message:
             links = []
             
-            for entity in message["caption_entities"]:
-                if "url" in entity.decode('unicode_escape'):
+            for entity in message["caption_entities"].decode('unicode_escape'):
+                if "url" in entity:
                     links.append(entity["url"])
             
             print(links)
