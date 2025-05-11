@@ -1,3 +1,5 @@
+[在ClawCLoud上部署](./documents/clawcloud.md)
+
 # jabagram
 
 A lightweight and fast, full-featured bridge between XMPP and Telegram. Was
@@ -5,8 +7,8 @@ originally written for personal use, so may not be very flexible in
 configuration.
 
 <p align="center" width="100%">
-<img width="35%" src="https://github.com/ventureoo/jabagram/assets/92667539/91646d1d-bee8-40e0-ad9a-071d2d4431b9"> 
-<img width="35%" src="https://github.com/ventureoo/jabagram/assets/92667539/1d74e64f-541d-4aa2-8913-2f43fcf06182"> 
+<img width="35%" src="https://github.com/ventureoo/jabagram/assets/92667539/91646d1d-bee8-40e0-ad9a-071d2d4431b9">
+<img width="35%" src="https://github.com/ventureoo/jabagram/assets/92667539/1d74e64f-541d-4aa2-8913-2f43fcf06182">
 </p>
 
 ## Features
@@ -22,7 +24,6 @@ This bridge has the following features and supports all the basic capabilities:
 - [x] Native replies to messages in Telegram
 - [x] Round-trip message edit changes
 - [x] Forwards events between bridged chats, such as mebmers join/exit, etc.
-
 
 ## Installation
 
@@ -169,7 +170,7 @@ This bridge has some limitation that will probably never be properly fixed.
 This bridge cannot forward messages that have been encrypted using OMEMO or
 OpenPGP. This will never be implemented because:
 
-1) slixmpp does not support encryption via OMEMO 
+1) slixmpp does not support encryption via OMEMO
 2) Forwarding encrypted messages is probably a bad idea in the first place, you
 are actually passing the body of your message unencrypted to the Telegram API,
 it will be visible to all Telegram chat members to see it. Which calls into
@@ -202,7 +203,7 @@ for users you have in your contacts [1]. Please, after inviting a bot to XMPP,
 make sure you remove it from your contacts, otherwise it will not accept
 Telegram sender nicknames for you.
 
-[1] - https://codeberg.org/iNPUTmice/Conversations/commit/ef1429c9a6983c101da41a277bd9353374dc89e7
+[1] - <https://codeberg.org/iNPUTmice/Conversations/commit/ef1429c9a6983c101da41a277bd9353374dc89e7>
 
 ## License
 

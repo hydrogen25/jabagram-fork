@@ -54,6 +54,16 @@ def main():
         '-v', '--verbose', dest="verbose",
         action='store_true', help="output debug information",
     )
+
+    parser.add_argument(
+        '--password', dest="xmpp_passwd"
+    )
+    parser.add_argument(
+        '--jid',dest="xmpp_jid"
+    )
+    parser.add_argument(
+        '--token',dest="tg_token"
+    )
     args = parser.parse_args()
 
     if args.verbose:
@@ -74,9 +84,21 @@ def main():
     try:
         config = configparser.ConfigParser(interpolation=None)
         messages = Messages(config)
+        if args.xmpp_jid and args.xmpp_passwd and args.tg_token:
+            with open("config.example.ini", "r", encoding="utf-8") as f:
+                config.read_file(f)
+           
+            config.set("xmpp","password",args.xmpp_passwd)
+            config.set("xmpp","login",args.xmpp_jid)
+            config.set("telegram","token",args.tg_token)
 
-        with open(args.config, "r", encoding="utf-8") as f:
-            config.read_file(f)
+        
+        else:
+            with open(args.config, "r", encoding="utf-8") as f:
+
+                config.read_file(f)
+
+
 
         messages.load()
         chat_storage = ChatStorage(path=args.data)

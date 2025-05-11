@@ -43,6 +43,7 @@ class Message(Event):
     sender: str
     reply: Optional[str] = field(repr=False, default=None)
     edit: Optional[bool] = False
+    thread_id: Optional[int] = None
 
 
 @dataclass(kw_only=True)

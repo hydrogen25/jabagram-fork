@@ -16,7 +16,6 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from asyncio import threads
 import logging
 import mimetypes
 
@@ -249,39 +248,42 @@ class TelegramClient(ChatHandlerFactory):
             reply_body = attachment.fname
 
         return reply_body
-    
     def __get_links(self,message:dict) -> str | None:
-        if "entities" in message:
-            links = []
-            for entity in message["entities"]:
-                if "url" in entity:
-                    links.append(entity["url"])
-            
-            if not links:
+        try:
+            if "本条消息包含以下连接↓ " in message:
                 return None
-            formatted="\n".join(links)+"\n"
+        
+            if "entities" in message.keys():
+                links = []
+                for entity in message["entities"]:
+                    if "url" in entity:
+                        links.append(entity["url"])
+                if not links:
+                    return None
+                formatted="\n".join(links)+"\n"
             
-            result = "\n\n\n本条消息包含以下连接↓ \n\n"+formatted
-            return result
-        elif "caption_entities" in message:
-            links = []
+                result = "\n\n\n本条消息包含以下连接↓ \n\n"+formatted
+                return result
+            elif "caption_entities" in message.keys():
+                links = []
             
-            for entity in message["caption_entities"].decode('unicode_escape'):
-                if "url" in entity:
-                    links.append(entity["url"])
+                for entity in message["caption_entities"]:
+                    if "url" in entity:
+                        links.append(entity["url"])
             
+                if not links:
+                    return None
+                formatted="\n".join(links)+"\n"
             
-            if not links:
+                result = "\n\n\n本条消息包含以下连接↓ \n\n"+formatted
+                return result
+            else:
                 return None
-            formatted="\n".join(links)+"\n"
-            
-            result = "\n\n\n本条消息包含以下连接↓ \n\n"+formatted
-            return result
-        else:
-            return None
+        except Exception as e:
+            logging.error(e)
 
                 
-  
+
 
     async def __process_message(self, raw_message: dict, edit=False) -> None:
         chat_id = str(raw_message['chat']['id'])
@@ -296,11 +298,9 @@ class TelegramClient(ChatHandlerFactory):
             sender, raw_message
         )
         topic_name: str | None = self.__extract_topic_name(raw_message)
-        topic_id:int | None = raw_message.get("message_thread_id")
-#析话题
+#解析话题
         if topic_name:
             sender += "消息来自话题 -> * [" + topic_name + "] *"
-
     
     
         if attachment:
@@ -313,7 +313,7 @@ class TelegramClient(ChatHandlerFactory):
                         f"{self.__token}/{file_path}"
                     )
                     return url
-                except TelegramApiError as error:
+                except TelegramApiError as erroentitiesr:
                     self.__logger.error(
                         "Failed to get url of attachment: %s", error
                     )
@@ -360,34 +360,21 @@ class TelegramClient(ChatHandlerFactory):
                     case {"sender_user_name": name}:
                         original_sender = name
 
-                text = f"**消息来自 {original_sender} **\n\n{text}"
+                text = f"**消息来自{original_sender}**\n\n{text}"
 
             if links:
                 text += f"\n{links}"
-            if topic_id:
-                await self.__disptacher.send(
-                    Message(
-                        event_id=message_id,
-                        address=chat_id,
-                        content=text,
-                        sender=sender,
-                        reply=reply,
-                        edit=edit,
-                        thread_id = topic_id 
-                    )
-                )
 
-            else:
-                    await self.__disptacher.send(
-                    Message(
-                        event_id=message_id,
-                        address=chat_id,
-                        content=text,
-                        sender=sender,
-                        reply=reply,
-                        edit=edit,
-                    )
+            await self.__disptacher.send(
+                Message(
+                    event_id=message_id,
+                    address=chat_id,
+                    content=text,
+                    sender=sender,
+                    reply=reply,
+                    edit=edit
                 )
+            )
 
     async def __process_kick_event(self, chat_member: dict) -> None:
         new_state = chat_member.get("new_chat_member")
