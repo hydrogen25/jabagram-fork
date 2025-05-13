@@ -19,6 +19,7 @@
 from asyncio import threads
 import logging
 import mimetypes
+from typing import Optional
 
 from jabagram.cache import Cache
 from jabagram.database.topics import TopicNameCache
@@ -45,7 +46,8 @@ class TelegramClient(ChatHandlerFactory):
         service: ChatService,
         dispatcher: MessageDispatcher,
         topic_name_cache: TopicNameCache,
-        messages: Messages
+        messages: Messages,
+        topic_id:Optional[int]
     ) -> None:
         self.__api: TelegramApi = TelegramApi(token)
         self.__token: str = token
@@ -57,6 +59,7 @@ class TelegramClient(ChatHandlerFactory):
         self.__messages = messages
         self.__handlers: dict[int, TelegramChatHandler] = {}
         self.__topic_name_cache = topic_name_cache
+        self.__default__topic__id = topic_id
 
     async def create_handler(
         self,
@@ -266,7 +269,7 @@ class TelegramClient(ChatHandlerFactory):
         elif "caption_entities" in message:
             links = []
             
-            for entity in message["caption_entities"].decode('unicode_escape'):
+            for entity in message["caption_entities"]:
                 if "url" in entity:
                     links.append(entity["url"])
             
@@ -296,10 +299,10 @@ class TelegramClient(ChatHandlerFactory):
             sender, raw_message
         )
         topic_name: str | None = self.__extract_topic_name(raw_message)
-        topic_id:int | None = raw_message.get("message_thread_id")
+        #topic_id:int | None = raw_message.get("message_thread_id")
 #析话题
         if topic_name:
-            sender += "消息来自话题 -> * [" + topic_name + "] *"
+            sender += "[" + topic_name + "]" 
 
     
     
@@ -364,30 +367,16 @@ class TelegramClient(ChatHandlerFactory):
 
             if links:
                 text += f"\n{links}"
-            if topic_id:
-                await self.__disptacher.send(
-                    Message(
-                        event_id=message_id,
-                        address=chat_id,
-                        content=text,
-                        sender=sender,
-                        reply=reply,
-                        edit=edit,
-                        thread_id = topic_id 
-                    )
+            await self.__disptacher.send(
+                Message(
+                    event_id=message_id,
+                    address=chat_id,
+                    content=text,
+                    sender=sender,
+                    reply=reply,
+                    edit=edit,
                 )
-
-            else:
-                    await self.__disptacher.send(
-                    Message(
-                        event_id=message_id,
-                        address=chat_id,
-                        content=text,
-                        sender=sender,
-                        reply=reply,
-                        edit=edit,
-                    )
-                )
+            )
 
     async def __process_kick_event(self, chat_member: dict) -> None:
         new_state = chat_member.get("new_chat_member")

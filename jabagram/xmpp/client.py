@@ -20,6 +20,7 @@ import asyncio
 import logging
 
 from datetime import datetime
+from typing import Optional
 from jabagram.cache import Cache
 from jabagram.database.stickers import StickerCache
 from jabagram.dispatcher import MessageDispatcher
@@ -46,7 +47,8 @@ class XmppClient(ClientXMPP, ChatHandlerFactory):
         service: ChatService,
         disptacher: MessageDispatcher,
         sticker_cache: StickerCache,
-        messages: Messages
+        messages: Messages,
+        topic_id:Optional[int]
     ) -> None:
         ClientXMPP.__init__(self, jid, password)
         self.__service = service
@@ -54,6 +56,7 @@ class XmppClient(ClientXMPP, ChatHandlerFactory):
         self.__dispatcher = disptacher
         self.__sticker_cache = sticker_cache
         self.__mucs = []
+        self.topic_id = None
 
         # Used XEPs
         xeps = ('xep_0030', 'xep_0249', 'xep_0071', 'xep_0363',
@@ -199,15 +202,26 @@ class XmppClient(ClientXMPP, ChatHandlerFactory):
 
             if reply and body:
                 content = body
+            if self.topic_id:
+                message = Message(
+                    address=muc,
+                    content=content,
+                    reply=reply,
+                    edit=is_edit,
+                    sender=sender,
+                    event_id=message_id,
+                    thread_id=self.topic_id
+                )
+            else:
+                    message = Message(
+                    address=muc,
+                    content=content,
+                    reply=reply,
+                    edit=is_edit,
+                    sender=sender,
+                    event_id=message_id,
+                )
 
-            message = Message(
-                address=muc,
-                content=content,
-                reply=reply,
-                edit=is_edit,
-                sender=sender,
-                event_id=message_id
-            )
             await self.__dispatcher.send(message)
 
     def __parse_reply(self, message: str) -> tuple[str | None, str | None]:

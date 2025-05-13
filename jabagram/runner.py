@@ -64,6 +64,12 @@ def main():
     parser.add_argument(
         '--token',dest="tg_token"
     )
+
+    parser.add_argument(
+        '--topic_id',dest="topic_id"
+    )
+    
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -97,8 +103,8 @@ def main():
             with open(args.config, "r", encoding="utf-8") as f:
 
                 config.read_file(f)
-
-
+        
+        
 
         messages.load()
         chat_storage = ChatStorage(path=args.data)
@@ -128,7 +134,9 @@ def main():
             service,
             dispatcher,
             topic_name_cache,
-            messages
+            messages,
+            topic_id=args.topic_id
+
         )
         xmpp = XmppClient(
             config.get("xmpp", "login"),
@@ -136,7 +144,8 @@ def main():
             service,
             dispatcher,
             sticker_cache,
-            messages
+            messages,
+            topic_id=args.topic_id
         )
         loop.create_task(telegram.start())
         loop.create_task(xmpp.start())
