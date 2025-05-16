@@ -291,6 +291,8 @@ class TelegramClient(ChatHandlerFactory):
                     replacement = f"*{raw_slice}*"
                 case "italic":
                     replacement = f"_{raw_slice}_"
+                case "blockquote":
+                    replacement = f">{raw_slice}"
                 case "underline":
                     replacement = f"<{raw_slice}>"
                 case "strikethrough":
