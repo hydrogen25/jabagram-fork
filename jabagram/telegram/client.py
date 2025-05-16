@@ -19,7 +19,7 @@
 from asyncio import threads
 import logging
 import mimetypes
-from typing import Optional
+from typing import List, Optional
 
 from jabagram.cache import Cache
 from jabagram.database.topics import TopicNameCache
@@ -252,45 +252,98 @@ class TelegramClient(ChatHandlerFactory):
             reply_body = attachment.fname
 
         return reply_body
-    
-    def __get_links(self,message:dict) -> str | None:
-        if "entities" in message:
-            links = []
-            for entity in message["entities"]:
-                if "url" in entity:
-                    links.append(entity["url"])
-            
-            if not links:
-                return None
-            formatted="\n".join(links)+"\n"
-            
-            result = "\n\n\n本条消息包含以下连接↓ \n\n"+formatted
-            return result
-        elif "caption_entities" in message:
-            links = []
-            
-            for entity in message["caption_entities"]:
-                if "url" in entity:
-                    links.append(entity["url"])
-            
-            
-            if not links:
-                return None
-            formatted="\n".join(links)+"\n"
-            
-            result = "\n\n\n本条消息包含以下连接↓ \n\n"+formatted
-            return result
-        else:
-            return None
+    def __format_to_xmpp(self,message:dict)-> str | None:
+        text:str|None = message.get("text") or message.get("caption") 
+        entities:List|None = message.get("entities") or message.get("caption_entities") 
+        if not text:
 
-                
-  
+            return None
+        if not entities:
+
+            return None
+        #elif not message.get("caption_entities"):
+         #   return None
+
+        entities = sorted(entities, key=lambda x: x["offset"], reverse=True)
+
+        for entity in entities:
+            offset = entity["offset"]
+            length = entity["length"]
+            raw_slice = text[offset:offset + length]
+
+            match entity["type"]:
+                case "mention": 
+                    replacement = f"*{raw_slice}*"
+                case "hashtag":
+                    replacement = f"_{raw_slice}_"
+                case "cashtag":
+                    replacement = f"_{raw_slice}_"
+                case "bot_command":
+                    replacement = f"_{raw_slice}_"
+                case "url":
+                    url = entity.get("url", raw_slice)
+                    replacement = f"[{raw_slice}]({url})"
+                case "email":
+                    replacement = f"_{raw_slice}_"
+                case "phone_number":
+                    replacement = f"_{raw_slice}_"
+                case "bold":
+                    replacement = f"*{raw_slice}*"
+                case "italic":
+                    replacement = f"_{raw_slice}_"
+                case "underline":
+                    replacement = f"<{raw_slice}>"
+                case "strikethrough":
+                    replacement = f"~~{raw_slice}~~"
+                case "spoiler":
+                    replacement = f"||{raw_slice}||"
+                case "code":
+                    replacement = f"`{raw_slice}`"
+                case "pre":
+                    language = entity.get("language", "")
+                    replacement = f"```\n{language}\n{raw_slice}\n```"
+                case "text_link":
+                    url = entity.get("url", raw_slice)
+                    replacement = f"[{raw_slice}]({url})"
+                case "text_mention":
+                    user = entity.get("user", {})
+                    first_name = user.get("first_name", "Unknown")
+                    user_id = user.get("id", "")
+                    username = user.get("username", "")
+                    replacement = f"(*{first_name} {username} {user_id}*) {raw_slice}"
+                case _:
+                    replacement = raw_slice  # 未知类型，保持原样
+
+            # 拼接字符串，确保只替换指定位置的文本
+            text = text[:offset] + replacement + text[offset + length:]
+
+            return text
+            
+                        
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+        
+
+          
 
     async def __process_message(self, raw_message: dict, edit=False) -> None:
         chat_id = str(raw_message['chat']['id'])
         message_id = str(raw_message['message_id'])
         sender: str = self.__get_full_name(raw_message['from'])
-        links:str | None = self.__get_links(raw_message)
+        entities:str | None = self.__format_to_xmpp(raw_message)
         text: str | None = raw_message.get(
             "text") or raw_message.get("caption")
         reply: str | None = self.__get_reply(raw_message)
@@ -363,10 +416,12 @@ class TelegramClient(ChatHandlerFactory):
                     case {"sender_user_name": name}:
                         original_sender = name
 
-                text = f"**消息来自 {original_sender} **\n\n{text}"
+                text = f"*消息来自 {original_sender}*\n\n"
+                
 
-            if links:
-                text += f"\n{links}"
+            if entities:
+                text = entities
+                
             await self.__disptacher.send(
                 Message(
                     event_id=message_id,
