@@ -296,7 +296,7 @@ class TelegramClient(ChatHandlerFactory):
                 case "underline":
                     replacement = f"<{raw_slice}>"
                 case "strikethrough":
-                    replacement = f"~~{raw_slice}~~"
+                    replacement = f"~{raw_slice}~"
                 case "spoiler":
                     replacement = f"||{raw_slice}||"
                 case "code":
@@ -312,7 +312,7 @@ class TelegramClient(ChatHandlerFactory):
                     first_name = user.get("first_name", "Unknown")
                     user_id = user.get("id", "")
                     username = user.get("username", "")
-                    replacement = f"(*{first_name} {username} {user_id}*) {raw_slice}"
+                    replacement = f"(用户名昵称 ：{first_name} {username} 用户ID：{user_id}) {raw_slice}"
                 case _:
                     replacement = raw_slice  # 未知类型，保持原样
 
