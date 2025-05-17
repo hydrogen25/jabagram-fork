@@ -273,7 +273,7 @@ class TelegramClient(ChatHandlerFactory):
 
             match entity["type"]:
                 case "mention": 
-                    replacement = f"*{raw_slice}*"
+                    replacement = f" *{raw_slice}* "
                 case "hashtag":
                     replacement = f"_{raw_slice}_"
                 case "cashtag":
@@ -288,7 +288,7 @@ class TelegramClient(ChatHandlerFactory):
                 case "phone_number":
                     replacement = f"_{raw_slice}_"
                 case "bold":
-                    replacement = f"*{raw_slice}*"
+                    replacement = f" *{raw_slice}* "
                 case "italic":
                     replacement = f"_{raw_slice}_"
                 case "blockquote":
@@ -319,7 +319,7 @@ class TelegramClient(ChatHandlerFactory):
             # 拼接字符串，确保只替换指定位置的文本
             text = text[:offset] + replacement + text[offset + length:]
 
-            return text
+        return text
             
                         
 
@@ -422,7 +422,7 @@ class TelegramClient(ChatHandlerFactory):
                 
 
             if entities:
-                text = entities
+                text += f"\n{entities}"
                 
             await self.__disptacher.send(
                 Message(
