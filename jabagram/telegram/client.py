@@ -407,6 +407,9 @@ class TelegramClient(ChatHandlerFactory):
                 )
 
         if text:
+            if entities:
+                text = f"\n{entities}"
+
             if forward:
                 original_sender = "Unknown"
 
@@ -421,9 +424,7 @@ class TelegramClient(ChatHandlerFactory):
                 text = f"*消息来自 {original_sender}*\n\n"
                 
 
-            if entities:
-                text += f"\n{entities}"
-                
+               
             await self.__disptacher.send(
                 Message(
                     event_id=message_id,
