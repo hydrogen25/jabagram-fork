@@ -48,7 +48,9 @@ class XmppClient(ClientXMPP, ChatHandlerFactory):
         disptacher: MessageDispatcher,
         sticker_cache: StickerCache,
         messages: Messages,
-        topic_id:Optional[int]
+        topic_id:Optional[int],
+        privatebin_address:str,
+        max_limit:int
     ) -> None:
         ClientXMPP.__init__(self, jid, password)
         self.__service = service
@@ -57,6 +59,8 @@ class XmppClient(ClientXMPP, ChatHandlerFactory):
         self.__sticker_cache = sticker_cache
         self.__mucs = []
         self.topic_id = None
+        self.privatebin_address="https://0.0g.gg/"
+        self.max_limit=1000
 
         # Used XEPs
         xeps = ('xep_0030', 'xep_0249', 'xep_0071', 'xep_0363',

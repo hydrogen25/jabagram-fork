@@ -135,6 +135,8 @@ def main():
             dispatcher,
             topic_name_cache,
             messages,
+            max_limit=int(config.get("privatebin","limited_length")) or 1000,
+            privatebin_address=config.get("privatebin","api_address") or "https://0.0g.gg/",
             topic_id=args.topic_id
 
         )
@@ -145,6 +147,8 @@ def main():
             dispatcher,
             sticker_cache,
             messages,
+            max_limit=int(config.get("privatebin","limited_length")) or 1000,
+            privatebin_address=config.get("privatebin","api_address") or "https://0.0g.gg/",
             topic_id=args.topic_id
         )
         loop.create_task(telegram.start())

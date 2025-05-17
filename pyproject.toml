@@ -11,7 +11,14 @@ keywords = ["xmpp", "telegram", "asyncio", "bridge"]
 license = "GPL-3.0-only"
 readme = "README.md"
 requires-python = ">= 3.10"
-dependencies = ["aiohttp", "slixmpp", "unidecode"]
+dependencies = [
+    "aiohttp",
+    "httpx[socks]==0.27.2",
+    "privatebinapi>=1.0.0",
+    "retrying>=1.3.4",
+    "slixmpp",
+    "unidecode",
+]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python",
