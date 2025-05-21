@@ -179,7 +179,7 @@ class XmppRoomHandler(ChatHandler):
 
     async def edit_message(self, message: Message) -> None:
         stanza = self.__cache.message_ids.get(message.event_id)
-
+        
         if not stanza:
             self.__logger.info(
                 "Failed to found stanza for event: %s",

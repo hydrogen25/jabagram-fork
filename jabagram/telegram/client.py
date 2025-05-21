@@ -324,16 +324,7 @@ class TelegramClient(ChatHandlerFactory):
 
             # 拼接字符串，确保只替换指定位置的文本
             text = text[:offset] + replacement + text[offset + length:]
-        
-        if len(text) >= self.max_limit:
-            re=await self.upload_to_privatebin(text)
-            return f"消息过长，已折叠↓\n\n{re}"
-            
-        else:
-            return text
-            
-                        
-
+        return text
 
 
 
@@ -433,7 +424,13 @@ class TelegramClient(ChatHandlerFactory):
                         original_sender = name
 
                 text = f"*消息来自 {original_sender}*\n\n{text}"
-                
+            if self.max_limit == 0:
+                pass
+            elif len(text) >= self.max_limit:
+                re=await self.upload_to_privatebin(text)
+                text = f"消息过长，已折叠↓\n\n{re}"
+            
+
 
                
             await self.__disptacher.send(
