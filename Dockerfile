@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 # 设置工作目录
 WORKDIR /app
@@ -8,11 +8,13 @@ RUN apt update && apt install -y --no-install-recommends \
   sqlite3 \
   && apt clean && rm -rf /var/lib/apt/lists/*
 
+RUN pip install --upgrade pip setuptools wheel hatchling
+
 # 复制项目文件（先复制依赖声明文件用于缓存优化）
 COPY pyproject.toml .
 COPY README.md .  
 RUN pip install --upgrade pip
-RUN pip install .
+RUN pip install . --retries 10 --timeout 30
 
 # 再复制剩余源代码
 COPY . .

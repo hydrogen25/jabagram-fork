@@ -2,8 +2,13 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+
+[tool.hatch.build.targets.wheel]
+packages = ["jabagram"]
+
 [project]
 name = "jabagram"
+version="1.0.0"
 description = "Fully functional bridge between Telegram and XMPP"
 authors = [ {name = "Vasiliy Stelmachenok", email = "ventureo@yandex.ru"} ]
 maintainers = [ {name = "Vasiliy Stelmachenok", email = "ventureo@yandex.ru"} ]
@@ -26,7 +31,6 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12"
 ]
-dynamic = ["version"]
 
 [project.scripts]
 jabagram = "jabagram.runner:main"
