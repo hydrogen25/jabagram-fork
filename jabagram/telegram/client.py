@@ -364,7 +364,7 @@ class TelegramClient(ChatHandlerFactory):
         
         #判断是否转发
         if text:
-            if self.__filter_message(raw_message):
+            if self.__filter_message(raw_message) is True:
                 return
 
         if topic_name:
@@ -514,9 +514,8 @@ class TelegramClient(ChatHandlerFactory):
         text:str|None = message.get("text") or message.get("caption") 
         if not text:
             return None
-
         # 禁止转发
-        prohibit_list = ["#[protect],#[nf],#[sf],#[pf]"]
+        prohibit_list = ["#[protect]","#[nf]","#[sf]","#[pf]"]
         for prohibit in prohibit_list:
             if prohibit in text:
                 return True

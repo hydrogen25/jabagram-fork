@@ -271,12 +271,12 @@ class XmppClient(ClientXMPP, ChatHandlerFactory):
 
     def __filter_message(self,message:Dict) -> bool | None:
 
-        text:str|None = message.get("text") or message.get("caption") 
+        text:str|None = message.get("body") 
         if not text:
             return None
 
         # 禁止转发
-        prohibit_list = ["#[protect],#[nf],#[sf],#[pf]"]
+        prohibit_list = ["#[protect]","#[nf]","#[sf]","#[pf]"]
         for prohibit in prohibit_list:
             if prohibit in text:
                 return True
