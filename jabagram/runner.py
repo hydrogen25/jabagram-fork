@@ -36,7 +36,6 @@ Configuration file not found.
 Perhaps you forgot to rename config.ini.example?
 Use the -c key to specify the full path to the config.
 """
-
 def main():
     parser = argparse.ArgumentParser(
         prog='jabagram',
@@ -69,9 +68,9 @@ def main():
         '--topic_id',dest="topic_id"
     )
     
-
+    global args
     args = parser.parse_args()
-
+    
     if args.verbose:
         logging.basicConfig(
             filename=None if path.exists("/.dockerenv") else "jabagram.log",
@@ -151,6 +150,7 @@ def main():
             privatebin_address=config.get("privatebin","api_address") or "https://0.0g.gg/",
             topic_id=args.topic_id
         )
+        
         loop.create_task(telegram.start())
         loop.create_task(xmpp.start())
         loop.create_task(dispatcher.start())

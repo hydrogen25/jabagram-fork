@@ -344,6 +344,7 @@ class TelegramClient(ChatHandlerFactory):
           
 
     async def __process_message(self, raw_message: dict, edit=False) -> None:
+
         chat_id = str(raw_message['chat']['id'])
         message_id = str(raw_message['message_id'])
         sender: str = self.__get_full_name(raw_message['from'])
@@ -356,12 +357,20 @@ class TelegramClient(ChatHandlerFactory):
             sender, raw_message
         )
         topic_name: str | None = self.__extract_topic_name(raw_message)
+
+
         #topic_id:int | None = raw_message.get("message_thread_id")
 #析话题
+        
+        #判断是否转发
+        if text:
+            if self.__filter_message(raw_message):
+                return
+
         if topic_name:
             sender += "[" + topic_name + "]" 
 
-    
+        
     
         if attachment:
             async def url_callback():
@@ -500,4 +509,16 @@ class TelegramClient(ChatHandlerFactory):
     def get_api(self) -> TelegramApi:
         return self.__api
 
+    def __filter_message(self,message:dict) -> bool | None:
 
+        text:str|None = message.get("text") or message.get("caption") 
+        if not text:
+            return None
+
+        # 禁止转发
+        prohibit_list = ["#[protect],#[nf],#[sf],#[pf]"]
+        for prohibit in prohibit_list:
+            if prohibit in text:
+                return True
+            else:
+                return False

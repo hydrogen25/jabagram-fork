@@ -20,7 +20,7 @@ import asyncio
 import logging
 
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional
 from jabagram.cache import Cache
 from jabagram.database.stickers import StickerCache
 from jabagram.dispatcher import MessageDispatcher
@@ -169,7 +169,9 @@ class XmppClient(ClientXMPP, ChatHandlerFactory):
         message_id = message['id']
         muc = message['mucroom']
         text = message['body'].strip()
-
+        if text:
+            if self.__filter_message(message) is True:
+                return
         if not self.__dispatcher.is_bound(muc):
             return
 
@@ -227,7 +229,7 @@ class XmppClient(ClientXMPP, ChatHandlerFactory):
                 )
 
             await self.__dispatcher.send(message)
-
+    
     def __parse_reply(self, message: str) -> tuple[str | None, str | None]:
         def _safe_get(line: str, index: int):
             try:
@@ -266,3 +268,19 @@ class XmppClient(ClientXMPP, ChatHandlerFactory):
         body = "\n".join(parts)
 
         return reply, body
+
+    def __filter_message(self,message:Dict) -> bool | None:
+
+        text:str|None = message.get("text") or message.get("caption") 
+        if not text:
+            return None
+
+        # 禁止转发
+        prohibit_list = ["#[protect],#[nf],#[sf],#[pf]"]
+        for prohibit in prohibit_list:
+            if prohibit in text:
+                return True
+            else:
+                return False
+
+
